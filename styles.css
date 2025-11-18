@@ -1,8 +1,7 @@
 body {
-    /* Единый темно-серый фон для всего экрана */
     background: #23232a;
     margin: 0;
-    padding: 0;
+    padding: 40px 0; /* Дополнил padding сверху и снизу */
     height: 100%;
     min-height: 100vh;
     font-family: Arial, sans-serif;
@@ -12,7 +11,24 @@ body {
     align-items: center;
     position: relative;
     touch-action: manipulation;
+    overflow-x: hidden; /* Только по ширине — не мешает blur */
 }
+
+.center-ball {
+    width: 90px; /* Увеличен размер для большего пространства размытия */
+    height: 90px;
+    border-radius: 50%;
+    background: rgba(218,218,218,0.95); /* Чуть прозрачнее */
+    position: absolute;
+    left: 50%;
+    top: 38vh;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    filter: blur(8px); /* усилил размытие для примера */
+    box-shadow: 0 0 32px 12px rgba(46,46,56,0.5); /* расширенный тень — перекрывает границу blur */
+    pointer-events: none; /* круг не перехватывает клики */
+}
+
 
 /* Верхняя строка с очками */
 .score-bar {

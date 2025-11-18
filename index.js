@@ -173,7 +173,7 @@ function wrongAnswer() {
 
 // ---------- Сброс игры ----------
 function resetGame(fail = false) {
-    centerBall.style.background = "#dadada";
+    centerBall.style.background = "#ffffff";
     centerBall.style.filter = "blur(0px)";
     setUserCount(0);
     gameState = fail ? "start" : "anim";

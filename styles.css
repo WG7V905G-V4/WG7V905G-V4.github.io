@@ -11,6 +11,7 @@ body {
     justify-content: center;
     align-items: center;
     position: relative;
+    touch-action: manipulation;
 }
 
 /* Верхняя строка с очками */

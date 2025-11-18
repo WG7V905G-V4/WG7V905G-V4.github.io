@@ -85,7 +85,7 @@ function animation() {
             ballDiv.style.background = ballObj.color;
             ballDiv.style.top = ballObj.top;
             ballDiv.style.left = ballObj.left;
-            ballDiv.style.opacity = "0";
+            ballDiv.style.opacity = "1";
             document.body.appendChild(ballDiv);
             ballsDiv.push(ballDiv);
         }
@@ -102,7 +102,7 @@ function animation() {
     }, 100);
     setTimeout(() => {
         for (let i = 0; i < ballsDiv.length; ++i) {
-            ballsDiv[i].style.opacity = "0";
+            ballsDiv[i].style.opacity = "1";
             ballsDiv[i].style.top = ballsCLass[i].top;
             ballsDiv[i].style.left = ballsCLass[i].left;
         }
@@ -110,7 +110,7 @@ function animation() {
             ballsDiv.forEach(ball => ball.remove());
             inputStage(ballsDiv.length);
         }, 900);
-    }, 900 + Math.max(0, 650 - level * 60));
+    }, 500 + Math.max(0, 650 - level * 60));
 }
 
 // ---------- Ввод ответа ----------

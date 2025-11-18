@@ -1,7 +1,40 @@
+/* Контейнер для блока счета и топа */
+.score-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 22px;
+    z-index: 10;
+}
+
+/* Ваша верхняя строка (ТОП) */
+.top-bar {
+    color: #aaa;
+    font-size: 18px;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+/* Строка с текущим счетом */
+.score-bar {
+    color: #aaa;
+    font-size: 17px;
+    text-align: center;
+    letter-spacing: 1px;
+    font-weight: 400;
+}
+
+/* Остальной твой CSS без изменений */
 body {
     background: #23232a;
     margin: 0;
-    padding: 40px 0; /* Дополнил padding сверху и снизу */
+    padding: 40px 0;
     height: 100%;
     min-height: 100vh;
     font-family: Arial, sans-serif;
@@ -11,69 +44,34 @@ body {
     align-items: center;
     position: relative;
     touch-action: manipulation;
-    overflow-x: hidden; /* Только по ширине — не мешает blur */
+    overflow-x: hidden;
 }
 
 .center-ball {
-    width: 90px; /* Увеличен размер для большего пространства размытия */
+    width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: rgba(218,218,218,0.95); /* Чуть прозрачнее */
+    background: rgba(218,218,218,0.90);
     position: absolute;
     left: 50%;
     top: 38vh;
     transform: translate(-50%, -50%);
     z-index: 3;
-    filter: blur(8px); /* усилил размытие для примера */
-    box-shadow: 0 0 32px 12px rgba(46,46,56,0.5); /* расширенный тень — перекрывает границу blur */
-    pointer-events: none; /* круг не перехватывает клики */
-}
-
-
-/* Верхняя строка с очками */
-.score-bar {
-    color: #aaa;
-    font-size: 17px;
-    margin-bottom: 12px;
-    margin-top: 20px;
-    width: 100vw;
-    text-align: center;
-    letter-spacing: 1px;
-}
-
-/* Центральный серый шарик */
-.center-ball{
-    border-radius: 50%;
-    position: absolute;
-    left: 50%;
-    top: 38vh;
-    transform: translate(-50%, -50%);
-}
-
-/* Размер и стили для центрального шарика */
-.center-ball {
-    width: 68px;
-    height: 68px;
-    background: #dadada;
-    z-index: 3;
-    transition: filter 500ms cubic-bezier(.4,0,.2,1), background 500ms cubic-bezier(.4,0,.2,1);
     filter: blur(0px);
-    box-shadow: 0 0 16px #2e2e38;
+    box-shadow: 0 0 32px 12px rgba(46,46,56,0.5);
+    pointer-events: none;
+    transition: filter 500ms cubic-bezier(.4,0,.2,1), background 500ms cubic-bezier(.4,0,.2,1);
 }
 
-/* Цветные шарики */
 .ball {
     border-radius: 50%;
     position: absolute;
     left: 50%;
     top: 38vh;
-
     transition: all 0.7s cubic-bezier(.4,0,.2,1), opacity 380ms cubic-bezier(.4,0,.2,1);
     will-change: top, left, opacity;
 }
 
-
-/* Панель ввода (счетчики и поле для числа) */
 .input-panel {
     margin: 250px auto 0 auto;
     display: flex;
@@ -83,7 +81,6 @@ body {
 }
 
 .input-panel button {
-    /* Кнопки плюс/минус */
     width: 40px;
     height: 40px;
     font-size: 1.5rem;
@@ -96,7 +93,6 @@ body {
 }
 
 .input-panel span {
-    /* Поле для отображения выбранного числа */
     width: 40px;
     display: inline-block;
     text-align: center;
@@ -104,7 +100,6 @@ body {
     color: #fff;
 }
 
-/* Основная большая кнопка для старта и подтверждения */
 .main-btn {
     width: 90vw;
     max-width: 320px;
@@ -124,8 +119,8 @@ body {
 }
 
 .main-btn.disabled {
-    /* Вид кнопки, когда ее нельзя нажать */
     background: #353542;
     color: #aaa;
     pointer-events: none;
 }
+

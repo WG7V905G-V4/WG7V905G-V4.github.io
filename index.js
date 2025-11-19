@@ -14,43 +14,32 @@ let level = 0;
 let gameState = "start";
 let showCount = 0;
 let topScore = 0;
-let userId = null;
+let userIp = null;
 let retrySend = false;
 let pendingScore = 0;
 
-// --- Telegram Utils ---
-
-function isTelegramApp() {
-    return (
-        typeof window !== "undefined" &&
-        window.Telegram &&
-        window.Telegram.WebApp &&
-        window.Telegram.WebApp.initDataUnsafe &&
-        typeof window.Telegram.WebApp.initDataUnsafe.user?.id !== "undefined"
-    );
-}
-
-function getTelegramUserId() {
-    try {
-        const userObj = window.Telegram.WebApp.initDataUnsafe.user;
-        if (userObj && userObj.id) {
-            return Number(userObj.id);
-        }
-    } catch (e) {}
-    return null;
-}
-
-// --- Работа с сервером ---
-
 const SERVER_HOST = "http://172.16.2.87:8080";
 
-async function getTopScore(id) {
-    if (!id) {
-        console.warn("getTopScore: userId не указан");
+// Получение IP устройства
+async function getUserIp() {
+    try {
+        const response = await fetch("https://api.ipify.org?format=json");
+        const data = await response.json();
+        return data.ip || null;
+    } catch (e) {
+        console.error("Не удалось получить IP адрес", e);
+        return null;
+    }
+}
+
+// Работа с сервером
+async function getTopScore(ip) {
+    if (!ip) {
+        console.warn("getTopScore: IP не указан");
         return 0;
     }
     try {
-        const response = await fetch(`${SERVER_HOST}/get_score?user_id=${id}`);
+        const response = await fetch(`${SERVER_HOST}/get_score?user_ip=${encodeURIComponent(ip)}`);
         const data = await response.json();
         if (typeof data.score === "number") return data.score;
         return 0;
@@ -59,17 +48,16 @@ async function getTopScore(id) {
         return 0;
     }
 }
-
-async function updateTopScore(id, score) {
-    if (!id) {
-        console.warn("updateTopScore: userId не указан");
+async function updateTopScore(ip, score) {
+    if (!ip) {
+        console.warn("updateTopScore: IP не указан");
         return;
     }
     try {
         const response = await fetch(`${SERVER_HOST}/update_score`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: id, score: score })
+            body: JSON.stringify({ userIp: ip, score: score })
         });
         if (!response.ok) throw new Error("Server error");
         retrySend = false;
@@ -81,22 +69,18 @@ async function updateTopScore(id, score) {
     }
 }
 
-// --- UI-штуки ---
-
+// UI-методы
 function padding(n) {
     return String(n).padStart(3, '0');
 }
-
 function setUserCount(n) {
     showCount = n;
     userCountSpan.textContent = padding(n);
 }
-
 function setMainBtnHandler(handler) {
     mainBtn.onclick = null;
     mainBtn.onclick = handler;
 }
-
 function setMainBtnState({ text, disabled, bg, color, filter }) {
     mainBtn.textContent = text;
     mainBtn.classList.toggle("disabled", disabled);
@@ -109,11 +93,9 @@ function setMainBtnState({ text, disabled, bg, color, filter }) {
 incBtn.onclick = () => {
     if (gameState === "input") setUserCount(Math.min(showCount + 1, 999));
 };
-
 decBtn.onclick = () => {
     if (gameState === "input") setUserCount(Math.max(showCount - 1, 1));
 };
-
 function startGame() {
     if (gameState !== "start") return;
     countMessage();
@@ -121,7 +103,6 @@ function startGame() {
 setMainBtnHandler(startGame);
 
 // --- Основной игровой цикл ---
-
 function countMessage() {
     gameState = "anim";
     setMainBtnState({
@@ -133,12 +114,10 @@ function countMessage() {
     });
     animation();
 }
-
 function animation() {
     gameState = "anim";
     const ballsCLass = [...ballGenerator(level, centerBall.getBoundingClientRect())];
     const ballsDiv = [];
-
     for (const ballObj of ballsCLass) {
         if (ballObj) {
             let ballDiv = document.createElement("div");
@@ -152,7 +131,6 @@ function animation() {
             ballsDiv.push(ballDiv);
         }
     }
-
     setTimeout(() => {
         ballsDiv.forEach((ballDiv, i) => {
             ballDiv.style.transition =
@@ -162,7 +140,6 @@ function animation() {
             ballDiv.style.left = ballsCLass[i].toLeft;
         });
     }, 100);
-
     setTimeout(() => {
         ballsDiv.forEach((ballDiv, i) => {
             ballDiv.style.opacity = "1";
@@ -175,7 +152,6 @@ function animation() {
         }, 900);
     }, 500 + Math.max(0, 650 - level * 60));
 }
-
 function inputStage(rightAnswer) {
     gameState = "input";
     setUserCount(0);
@@ -186,7 +162,6 @@ function inputStage(rightAnswer) {
         color: "#dadada",
         filter: "blur(0px)"
     });
-
     setTimeout(() => {
         setMainBtnState({
             text: "done",
@@ -205,7 +180,6 @@ function inputStage(rightAnswer) {
         });
     }, 650);
 }
-
 function rightAnswerAnim() {
     level++;
     scoreSpan.textContent = level;
@@ -219,7 +193,6 @@ function rightAnswerAnim() {
         resetGame(false);
     }, 1200);
 }
-
 function wrongAnswer() {
     centerBall.style.background = "#ef1e48";
     centerBall.style.filter = "blur(22px)";
@@ -227,15 +200,14 @@ function wrongAnswer() {
         resetGame(true);
     }, 1100);
 }
-
 function resetGame(fail = false) {
     centerBall.style.background = "#ffffff";
     centerBall.style.filter = "blur(0px)";
     setUserCount(0);
     gameState = fail ? "start" : "anim";
     if (fail) {
-        if (userId !== null) {
-            updateTopScore(userId, topScore);
+        if (userIp !== null) {
+            updateTopScore(userIp, topScore);
         }
         level = 0;
         scoreSpan.textContent = "0";
@@ -252,17 +224,15 @@ function resetGame(fail = false) {
     }
 }
 
-// --- Периодическая отправка сохранения рекорда ---
-
+// Периодическая отправка сохранения рекорда
 setInterval(() => {
-    if (retrySend && userId !== null) {
-        updateTopScore(userId, pendingScore);
+    if (retrySend && userIp !== null) {
+        updateTopScore(userIp, pendingScore);
     }
 }, 60000);
 
-// --- Главная инициализация ---
-
-window.onload = () => {
+// Главная инициализация
+window.onload = async () => {
     setUserCount(0);
     scoreSpan.textContent = level;
     setMainBtnState({
@@ -273,22 +243,12 @@ window.onload = () => {
         filter: "blur(0px)"
     });
     setMainBtnHandler(startGame);
-
-    if (isTelegramApp()) {
-        userId = getTelegramUserId();
-        console.log('Telegram Mini App detected, userId:', userId);
+    // Получаем IP и только после этого топ-скор
+    userIp = await getUserIp();
+    if (userIp) {
+        topScore = await getTopScore(userIp);
+        topScoreSpan.textContent = topScore;
     } else {
-        console.log('Запуск не в Telegram Mini App');
+        console.warn("IP пользователя не определен");
     }
-
-    initTopScore();
 };
-
-async function initTopScore() {
-    if (userId) {
-        topScore = await getTopScore(userId);
-    } else {
-        topScore = 0;
-    }
-    topScoreSpan.textContent = topScore;
-}

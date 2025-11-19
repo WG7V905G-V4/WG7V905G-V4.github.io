@@ -63,7 +63,7 @@ body {
     top: 38vh;
     transform: translate(-50%, -50%);
     z-index: 3;
-    box-shadow: 0 0 32px 12px rgba(46,46,56,0.5);
+    /*box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.5);*/
     pointer-events: none;
     transition: filter 500ms cubic-bezier(.4,0,.2,1), background 500ms cubic-bezier(.4,0,.2,1);
 }

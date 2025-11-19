@@ -8,8 +8,22 @@ const incBtn = document.getElementById("increment");
 const scoreSpan = document.getElementById("score");
 const topScoreSpan = document.getElementById("topScore");
 
+
+
 let level = 0;
-let topScore = 0;
+
+const userId = Telegram.WebApp.initDataUnsafe.user.id;
+
+async function getTopScore(user) {
+    const response = await fetch(`http://127.0.0.1:5000/get_score?user_id=${user}`);
+    const data = await response.json();
+    return data.score || 0;
+}
+
+// Вызов и отображение:
+let topScore = await getTopScore(userId);
+document.getElementById('topScore').textContent = topScore;
+
 let gameState = "start";
 let showCount = 0;
 
@@ -59,7 +73,7 @@ function startGame() {
 }
 setMainBtnHandler(startGame);
 
-// ---------- Фаза счёта и появления шариков ----------
+
 function countMessage() {
     gameState = "anim";
     setMainBtnState({
@@ -146,7 +160,6 @@ function inputStage(rightAnswer) {
     }, 650);
 }
 
-// ---------- Анимация правильного ответа ----------
 function rightAnswerAnim() {
     level++;
     scoreSpan.textContent = level;
@@ -189,11 +202,11 @@ function resetGame(fail = false) {
             filter: "blur(0px)"
         });
     } else {
-        setTimeout(countMessage, 400);
+        countMessage();
     }
 }
 
-// ---------- Инициализация при загрузке ----------
+
 window.onload = () => {
     topScore = parseInt(localStorage.getItem("bestScore")) || 0;
     topScoreSpan.textContent = topScore;

@@ -8,22 +8,26 @@ const incBtn = document.getElementById("increment");
 const scoreSpan = document.getElementById("score");
 const topScoreSpan = document.getElementById("topScore");
 
+let topScore = 0;
+let userId = null;
 
-
-let level = 0;
-
-const userId = Telegram.WebApp.initDataUnsafe.user.id;
-
-async function getTopScore(user) {
-    const response = await fetch(`http://127.0.0.1:5000/get_score?user_id=${user}`);
-    const data = await response.json();
-    return data.score || 0;
+if (
+    window.Telegram &&
+    window.Telegram.WebApp &&
+    window.Telegram.WebApp.initDataUnsafe &&
+    window.Telegram.WebApp.initDataUnsafe.user
+) {
+    userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+    getTopScore(userId).then(score => {
+        topScore = score;
+        topScoreSpan.textContent = topScore;
+    });
+} else {
+    topScore = 0;
+    topScoreSpan.textContent = topScore;
 }
 
-// Вызов и отображение:
-let topScore = await getTopScore(userId);
-document.getElementById('topScore').textContent = topScore;
-
+let level = 0;
 let gameState = "start";
 let showCount = 0;
 
@@ -36,7 +40,6 @@ function setUserCount(n) {
     userCountSpan.textContent = padding(n);
 }
 
-// ---------- Логика смены обработчика mainBtn ----------
 function setMainBtnHandler(handler) {
     mainBtn.onclick = null;
     mainBtn.onclick = handler;
@@ -56,7 +59,6 @@ function setMainBtnState({ text, disabled, bg, color, filter }) {
     if (filter) mainBtn.style.filter = filter;
 }
 
-// ---------- Кнопки увеличения и уменьшения ----------
 incBtn.onclick = () => {
     if (gameState !== "input") return;
     setUserCount(Math.min(showCount + 1, 999));
@@ -66,13 +68,11 @@ decBtn.onclick = () => {
     setUserCount(Math.max(showCount - 1, 1));
 };
 
-// ---------- Старт игры ----------
 function startGame() {
     if (gameState !== "start") return;
     countMessage();
 }
 setMainBtnHandler(startGame);
-
 
 function countMessage() {
     gameState = "anim";
@@ -89,7 +89,6 @@ function countMessage() {
 function animation() {
     gameState = "anim";
     let ballsCLass = [...ballGenerator(level, centerBall.getBoundingClientRect())];
-
     let ballsDiv = [];
     for (const ballObj of ballsCLass) {
         if (ballObj) {
@@ -104,7 +103,6 @@ function animation() {
             ballsDiv.push(ballDiv);
         }
     }
-
     setTimeout(() => {
         for (let i = 0; i < ballsDiv.length; ++i) {
             ballsDiv[i].style.transition =
@@ -127,11 +125,9 @@ function animation() {
     }, 500 + Math.max(0, 650 - level * 60));
 }
 
-// ---------- Ввод ответа ----------
 function inputStage(rightAnswer) {
     gameState = "input";
     setUserCount(0);
-
     setMainBtnState({
         text: "count",
         disabled: true,
@@ -139,7 +135,6 @@ function inputStage(rightAnswer) {
         color: "#dadada",
         filter: "blur(0px)"
     });
-
     setTimeout(() => {
         setMainBtnState({
             text: "done",
@@ -148,7 +143,6 @@ function inputStage(rightAnswer) {
             color: "#333",
             filter: "blur(0px)"
         });
-
         setMainBtnHandler(() => {
             if (gameState !== "input") return;
             if (rightAnswer === showCount) {
@@ -166,7 +160,6 @@ function rightAnswerAnim() {
     if (level > topScore) {
         topScore = level;
         topScoreSpan.textContent = topScore;
-        localStorage.setItem("bestScore", topScore);
     }
     centerBall.style.background = "#00aa2a";
     centerBall.style.filter = "blur(22px)";
@@ -175,7 +168,6 @@ function rightAnswerAnim() {
     }, 1200);
 }
 
-// ---------- Анимация неправильного ответа ----------
 function wrongAnswer() {
     centerBall.style.background = "#ef1e48";
     centerBall.style.filter = "blur(22px)";
@@ -184,13 +176,15 @@ function wrongAnswer() {
     }, 1100);
 }
 
-// ---------- Сброс игры ----------
 function resetGame(fail = false) {
     centerBall.style.background = "#ffffff";
     centerBall.style.filter = "blur(0px)";
     setUserCount(0);
     gameState = fail ? "start" : "anim";
     if (fail) {
+        if (userId !== null) {
+            updateTopScore(userId, topScore);
+        }
         level = 0;
         scoreSpan.textContent = "0";
         setMainBtnHandler(startGame);
@@ -206,10 +200,23 @@ function resetGame(fail = false) {
     }
 }
 
+async function getTopScore(id) {
+    const response = await fetch(`https://yourserver.com/get_score?user_id=${id}`);
+    const data = await response.json();
+    return data.score || 0;
+}
+
+async function updateTopScore(id, score) {
+    try {
+        await fetch('https://yourserver.com/update_score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: id, score: score })
+        });
+    } catch (e) {}
+}
 
 window.onload = () => {
-    topScore = parseInt(localStorage.getItem("bestScore")) || 0;
-    topScoreSpan.textContent = topScore;
     setUserCount(0);
     scoreSpan.textContent = level;
     setMainBtnState({
@@ -221,4 +228,3 @@ window.onload = () => {
     });
     setMainBtnHandler(startGame);
 };
-

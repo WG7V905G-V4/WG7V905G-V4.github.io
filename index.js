@@ -1,5 +1,6 @@
 import { ballGenerator } from './ballgeneration.js';
 
+// DOM элементы
 const userCountSpan = document.getElementById("user-count");
 const centerBall = document.getElementById("center-ball");
 const mainBtn = document.getElementById("main-btn");
@@ -8,10 +9,16 @@ const incBtn = document.getElementById("increment");
 const scoreSpan = document.getElementById("score");
 const topScoreSpan = document.getElementById("topScore");
 
+// Состояния
+let level = 0;
+let gameState = "start";
+let showCount = 0;
 let topScore = 0;
 let userId = null;
 let retrySend = false;
 let pendingScore = 0;
+
+// --- Telegram Utils ---
 
 function isTelegramApp() {
     return (
@@ -19,48 +26,62 @@ function isTelegramApp() {
         window.Telegram &&
         window.Telegram.WebApp &&
         window.Telegram.WebApp.initDataUnsafe &&
-        window.Telegram.WebApp.initDataUnsafe.user
+        typeof window.Telegram.WebApp.initDataUnsafe.user?.id !== "undefined"
     );
 }
 
-async function getTopScore(id) {
+function getTelegramUserId() {
     try {
-        const response = await fetch(`http://172.16.2.87:8080/get_score?user_id=${id}`);
+        const userObj = window.Telegram.WebApp.initDataUnsafe.user;
+        if (userObj && userObj.id) {
+            return Number(userObj.id);
+        }
+    } catch (e) {}
+    return null;
+}
+
+// --- Работа с сервером ---
+
+const SERVER_HOST = "http://172.16.2.87:8080";
+
+async function getTopScore(id) {
+    if (!id) {
+        console.warn("getTopScore: userId не указан");
+        return 0;
+    }
+    try {
+        const response = await fetch(`${SERVER_HOST}/get_score?user_id=${id}`);
         const data = await response.json();
-        return typeof data.score === "number" ? data.score : 0;
+        if (typeof data.score === "number") return data.score;
+        return 0;
     } catch (e) {
+        console.error("getTopScore error", e);
         return 0;
     }
 }
 
 async function updateTopScore(id, score) {
+    if (!id) {
+        console.warn("updateTopScore: userId не указан");
+        return;
+    }
     try {
-        const response = await fetch('http://172.16.2.87:8080/update_score', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        const response = await fetch(`${SERVER_HOST}/update_score`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId: id, score: score })
         });
         if (!response.ok) throw new Error("Server error");
         retrySend = false;
+        console.log("Рекорд отправлен!", score);
     } catch (e) {
+        console.error("updateTopScore ошибка", e);
         retrySend = true;
         pendingScore = score;
     }
 }
 
-async function initTopScore() {
-    if (isTelegramApp()) {
-        userId = window.Telegram.WebApp.initDataUnsafe.user.id;
-        topScore = await getTopScore(userId);
-    } else {
-        topScore = 0;
-    }
-    topScoreSpan.textContent = topScore;
-}
-
-let level = 0;
-let gameState = "start";
-let showCount = 0;
+// --- UI-штуки ---
 
 function padding(n) {
     return String(n).padStart(3, '0');
@@ -86,13 +107,11 @@ function setMainBtnState({ text, disabled, bg, color, filter }) {
 }
 
 incBtn.onclick = () => {
-    if (gameState !== "input") return;
-    setUserCount(Math.min(showCount + 1, 999));
+    if (gameState === "input") setUserCount(Math.min(showCount + 1, 999));
 };
 
 decBtn.onclick = () => {
-    if (gameState !== "input") return;
-    setUserCount(Math.max(showCount - 1, 1));
+    if (gameState === "input") setUserCount(Math.max(showCount - 1, 1));
 };
 
 function startGame() {
@@ -100,6 +119,8 @@ function startGame() {
     countMessage();
 }
 setMainBtnHandler(startGame);
+
+// --- Основной игровой цикл ---
 
 function countMessage() {
     gameState = "anim";
@@ -117,6 +138,7 @@ function animation() {
     gameState = "anim";
     const ballsCLass = [...ballGenerator(level, centerBall.getBoundingClientRect())];
     const ballsDiv = [];
+
     for (const ballObj of ballsCLass) {
         if (ballObj) {
             let ballDiv = document.createElement("div");
@@ -130,21 +152,23 @@ function animation() {
             ballsDiv.push(ballDiv);
         }
     }
+
     setTimeout(() => {
-        for (let i = 0; i < ballsDiv.length; ++i) {
-            ballsDiv[i].style.transition =
+        ballsDiv.forEach((ballDiv, i) => {
+            ballDiv.style.transition =
                 "top 0.7s cubic-bezier(.4,0,.2,1), left 0.7s cubic-bezier(.4,0,.2,1), opacity 380ms cubic-bezier(.4,0,.2,1)";
-            ballsDiv[i].style.opacity = "1";
-            ballsDiv[i].style.top = ballsCLass[i].toTop;
-            ballsDiv[i].style.left = ballsCLass[i].toLeft;
-        }
+            ballDiv.style.opacity = "1";
+            ballDiv.style.top = ballsCLass[i].toTop;
+            ballDiv.style.left = ballsCLass[i].toLeft;
+        });
     }, 100);
+
     setTimeout(() => {
-        for (let i = 0; i < ballsDiv.length; ++i) {
-            ballsDiv[i].style.opacity = "1";
-            ballsDiv[i].style.top = ballsCLass[i].top;
-            ballsDiv[i].style.left = ballsCLass[i].left;
-        }
+        ballsDiv.forEach((ballDiv, i) => {
+            ballDiv.style.opacity = "1";
+            ballDiv.style.top = ballsCLass[i].top;
+            ballDiv.style.left = ballsCLass[i].left;
+        });
         setTimeout(() => {
             ballsDiv.forEach(ball => ball.remove());
             inputStage(ballsDiv.length);
@@ -162,6 +186,7 @@ function inputStage(rightAnswer) {
         color: "#dadada",
         filter: "blur(0px)"
     });
+
     setTimeout(() => {
         setMainBtnState({
             text: "done",
@@ -227,13 +252,15 @@ function resetGame(fail = false) {
     }
 }
 
-// Периодическая проверка необходимости отправки рекорда
+// --- Периодическая отправка сохранения рекорда ---
+
 setInterval(() => {
     if (retrySend && userId !== null) {
         updateTopScore(userId, pendingScore);
     }
 }, 60000);
 
+// --- Главная инициализация ---
 
 window.onload = () => {
     setUserCount(0);
@@ -246,5 +273,22 @@ window.onload = () => {
         filter: "blur(0px)"
     });
     setMainBtnHandler(startGame);
+
+    if (isTelegramApp()) {
+        userId = getTelegramUserId();
+        console.log('Telegram Mini App detected, userId:', userId);
+    } else {
+        console.log('Запуск не в Telegram Mini App');
+    }
+
     initTopScore();
 };
+
+async function initTopScore() {
+    if (userId) {
+        topScore = await getTopScore(userId);
+    } else {
+        topScore = 0;
+    }
+    topScoreSpan.textContent = topScore;
+}

@@ -25,7 +25,7 @@ function isTelegramApp() {
 
 async function getTopScore(id) {
     try {
-        const response = await fetch(`https://yourserver.com/get_score?user_id=${id}`);
+        const response = await fetch(`http://172.16.2.87:8080/get_score?user_id=${id}`);
         const data = await response.json();
         return typeof data.score === "number" ? data.score : 0;
     } catch (e) {
@@ -35,7 +35,7 @@ async function getTopScore(id) {
 
 async function updateTopScore(id, score) {
     try {
-        const response = await fetch('https://yourserver.com/update_score', {
+        const response = await fetch('http://172.16.2.87:8080/update_score', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: id, score: score })

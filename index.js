@@ -10,6 +10,8 @@ const topScoreSpan = document.getElementById("topScore");
 
 let topScore = 0;
 let userId = null;
+let retrySend = false;
+let pendingScore = 0;
 
 function isTelegramApp() {
     return (
@@ -19,6 +21,31 @@ function isTelegramApp() {
         window.Telegram.WebApp.initDataUnsafe &&
         window.Telegram.WebApp.initDataUnsafe.user
     );
+}
+
+async function getTopScore(id) {
+    try {
+        const response = await fetch(`https://yourserver.com/get_score?user_id=${id}`);
+        const data = await response.json();
+        return typeof data.score === "number" ? data.score : 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+async function updateTopScore(id, score) {
+    try {
+        const response = await fetch('https://yourserver.com/update_score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: id, score: score })
+        });
+        if (!response.ok) throw new Error("Server error");
+        retrySend = false;
+    } catch (e) {
+        retrySend = true;
+        pendingScore = score;
+    }
 }
 
 async function initTopScore() {
@@ -51,13 +78,8 @@ function setMainBtnHandler(handler) {
 
 function setMainBtnState({ text, disabled, bg, color, filter }) {
     mainBtn.textContent = text;
-    if (disabled) {
-        mainBtn.classList.add("disabled");
-        mainBtn.style.pointerEvents = "none";
-    } else {
-        mainBtn.classList.remove("disabled");
-        mainBtn.style.pointerEvents = "auto";
-    }
+    mainBtn.classList.toggle("disabled", disabled);
+    mainBtn.style.pointerEvents = disabled ? "none" : "auto";
     if (bg) mainBtn.style.background = bg;
     if (color) mainBtn.style.color = color;
     if (filter) mainBtn.style.filter = filter;
@@ -93,8 +115,8 @@ function countMessage() {
 
 function animation() {
     gameState = "anim";
-    let ballsCLass = [...ballGenerator(level, centerBall.getBoundingClientRect())];
-    let ballsDiv = [];
+    const ballsCLass = [...ballGenerator(level, centerBall.getBoundingClientRect())];
+    const ballsDiv = [];
     for (const ballObj of ballsCLass) {
         if (ballObj) {
             let ballDiv = document.createElement("div");
@@ -205,21 +227,13 @@ function resetGame(fail = false) {
     }
 }
 
-async function getTopScore(id) {
-    const response = await fetch(`https://yourserver.com/get_score?user_id=${id}`);
-    const data = await response.json();
-    return data.score || 0;
-}
+// Периодическая проверка необходимости отправки рекорда
+setInterval(() => {
+    if (retrySend && userId !== null) {
+        updateTopScore(userId, pendingScore);
+    }
+}, 60000);
 
-async function updateTopScore(id, score) {
-    try {
-        await fetch('https://yourserver.com/update_score', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: id, score: score })
-        });
-    } catch (e) {}
-}
 
 window.onload = () => {
     setUserCount(0);

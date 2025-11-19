@@ -11,19 +11,23 @@ const topScoreSpan = document.getElementById("topScore");
 let topScore = 0;
 let userId = null;
 
-if (
-    window.Telegram &&
-    window.Telegram.WebApp &&
-    window.Telegram.WebApp.initDataUnsafe &&
-    window.Telegram.WebApp.initDataUnsafe.user
-) {
-    userId = window.Telegram.WebApp.initDataUnsafe.user.id;
-    getTopScore(userId).then(score => {
-        topScore = score;
-        topScoreSpan.textContent = topScore;
-    });
-} else {
-    topScore = 0;
+function isTelegramApp() {
+    return (
+        typeof window !== "undefined" &&
+        window.Telegram &&
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.initDataUnsafe &&
+        window.Telegram.WebApp.initDataUnsafe.user
+    );
+}
+
+async function initTopScore() {
+    if (isTelegramApp()) {
+        userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        topScore = await getTopScore(userId);
+    } else {
+        topScore = 0;
+    }
     topScoreSpan.textContent = topScore;
 }
 
@@ -63,6 +67,7 @@ incBtn.onclick = () => {
     if (gameState !== "input") return;
     setUserCount(Math.min(showCount + 1, 999));
 };
+
 decBtn.onclick = () => {
     if (gameState !== "input") return;
     setUserCount(Math.max(showCount - 1, 1));
@@ -227,4 +232,5 @@ window.onload = () => {
         filter: "blur(0px)"
     });
     setMainBtnHandler(startGame);
+    initTopScore();
 };

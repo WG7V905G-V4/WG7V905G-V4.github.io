@@ -100,3 +100,7 @@ app.post("/api/data", (req, res) => {
 app.listen(port, host, () => {
     console.log(`Server listening on http://${host}:${port}`);
 });
+
+app.get("/api/data/ping", (req, res) => {
+    res.json({ status: 'alive', time: new Date().toISOString() });
+});

@@ -1,4 +1,4 @@
-const API_URL = 'https://game-server-xyz123.onrender.com';
+const API_URL = 'https://soylok.onrender.com';
 
 export async function getData(userId) {
     try {
@@ -44,14 +44,10 @@ export function getUserId() {
     let userId = localStorage.getItem(STORAGE_KEY);
 
     if (!userId) {
-        userId = generateUniqueId();
+        userId = crypto.randomUUID();
         localStorage.setItem(STORAGE_KEY, userId);
         console.log('New user ID created:', userId);
     }
 
     return userId;
-}
-
-function generateUniqueId() {
-    return crypto.randomUUID();
 }

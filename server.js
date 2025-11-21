@@ -3,7 +3,8 @@ const cors = require('cors');
 const fs = require("node:fs");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+const host = process.env.HOST || '0.0.0.0';
 
 app.use(cors());
 app.use(express.json());
@@ -45,7 +46,7 @@ app.get("/api/data/:user", (req, res) => {
                 value: answer.value
             });
         } else {
-            return res.status(404).json({
+            return res.status(200).json({
                 value: 0
             });
         }
@@ -96,6 +97,6 @@ app.post("/api/data", (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
+app.listen(port, host, () => {
+    console.log(`Server listening on http://${host}:${port}`);
 });

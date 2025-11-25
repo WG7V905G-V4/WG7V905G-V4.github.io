@@ -5,23 +5,39 @@
     <title>SOYLOK+</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-<!-- Панель с текущим и лучшим счетом -->
-<div class="score-container">
-    <div class="top-bar">top: <span id="topScore">0</span></div>
-    <div class="score-bar">score: <span id="score">0</span></div>
-</div>
+    <div class="main-container">
+        
+        <div class = "ball-containter">
+            <div id="center-ball" class="center-ball"></div>
+        </div>
+
+        <div class="operating">
+            <div class="score-container">
+                <div class="top">
+                    top: <span id="topScore">0</span>
+                </div>
+                <div class="score">
+                    score: <span id="score">0</span>
+                </div>
+            </div>
+            <div class="num-input">
+                <button class="num-btn" id="decrement">-</button>
+                <span class="panel" id="user-count">000</span>
+                <button class="num-btn" id="increment">+</button>
+            </div>
+
+            <button class="btn" id="main-btn">start game</button>
+        </div>
+        
+    </div>
 
 
-<!-- Центральный серый шарик (из-за него и появляются цветные шарики) -->
-<div id="center-ball" class="center-ball"></div>
-<!-- Панель ввода количества, которое угадал игрок (счетчики минус/плюс) -->
-<div class="input-panel">
-    <button id="decrement">-</button>
-    <span id="user-count">000</span>
-    <button id="increment">+</button>
-</div>
-<button id="main-btn" class="main-btn">start game</button>
-<script type="module" src="index.js"></script>
+    <script type="module" src="index.js"></script>
+    
+    
+   
+
 </body>
 </html>

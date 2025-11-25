@@ -1,130 +1,164 @@
-/* Контейнер для блока счета и топа */
 html, body {
     overflow: hidden;
+    user-select: none;
 }
 
 
-
-.score-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 22px;
-    z-index: 10;
-}
-
-/* Ваша верхняя строка (ТОП) */
-.top-bar {
-    color: #aaa;
-    font-size: 18px;
-    letter-spacing: 1px;
-    text-align: center;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-
-/* Строка с текущим счетом */
-.score-bar {
-    color: #aaa;
-    font-size: 17px;
-    text-align: center;
-    letter-spacing: 1px;
-    font-weight: 400;
-}
-
-/* Остальной твой CSS без изменений */
 body {
-    background: #23232a;
+    background: #333;
+    height: 100vh;
     margin: 0;
-    padding: 40px 0;
-    height: 100%;
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+
+    font-family: Arial;
+    font-size: 20px;
+}
+
+.main-container {
+    max-width: 400px; /* Фиксированная ширина */
+    width: 100%; /* Максимальная ширина 100% экрана */
+    margin: 0 auto; /* Центрирование по горизонтали */
+    display: flex; /* Включаем Flexbox */
+    flex-direction: column; /* Расположение элементов в столбик */
+    align-items: center; /* Центрирование элементов по горизонтали */
+    justify-content: center; /* Центрирование элементов по вертикали (опционально) */
+    height: 100vh; /* Занимаем всю высоту экрана */
+     /* Фон для наглядности (опционально) */
+    padding: 20px 0 100px 0; /* Внутренние отступы (опционально) */
+    box-sizing: border-box; /* Учитываем padding в ширину */
+}
+
+
+.ball-containter {
     position: relative;
-    touch-action: manipulation;
-    overflow-x: hidden;
+    width: 100%;
+    height: 70%;
+    top: 0;
+
 }
 
 .center-ball {
-    width: 90px;
-    height: 90px;
+    position: relative;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    background: rgb(255, 255, 255);
+    background: #dadada;
     position: absolute;
+    top: 50%;
     left: 50%;
-    top: 38vh;
     transform: translate(-50%, -50%);
+    
     z-index: 3;
     /*box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.5);*/
     pointer-events: none;
-    transition: filter 500ms cubic-bezier(.4,0,.2,1), background 500ms cubic-bezier(.4,0,.2,1);
+    transition: filter 500ms ease-in-out, background-color 500ms ease-in-out;
 }
+
+
+
 
 .ball {
     border-radius: 50%;
     position: absolute;
     left: 50%;
     top: 38vh;
-    transition: 0.5s ease-in-out;
+    transition: 5s ease-in-out;
     will-change: top, left, opacity;
 }
 
-.input-panel {
-    margin: 250px auto 0 auto;
+
+
+.operating {
+    position: relative; /* Абсолютное позиционирование */
+    top: 0; /* Прилипает к верхнему краю родителя */
+     /* Смещение на половину ширины для центрирования */
+    width: 100%;
+    height: 25%; /* Занимает всю ширину родителя */
+     /* Максимальная ширина совпадает с .main-container */
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 20px 0 20px;
+
     display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрирование содержимого по горизонтали */
+    justify-content: center; /* Центрирование содержимого по вертикали */
+    gap : 10px;
+
+    color: #dadada;
+
+    letter-spacing: 1px;
+    text-align: center;
+    z-index: 3;
+    font-weight: 500;
+}
+
+
+.score-container {
+    position: relative; /* Абсолютное позиционирование */
+    top: 0; /* Прилипает к верхнему краю родителя */
+    left: 50%; /* Центрирование по горизонтали */
+    transform: translateX(-50%); /* Смещение на половину ширины для центрирования */
+    width: 100%; /* Занимает всю ширину родителя */
+    max-width: 400px; /* Максимальная ширина совпадает с .main-container */
+    box-sizing: border-box;
+    
+
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрирование содержимого по горизонтали */
+    justify-content: center; /* Центрирование содержимого по вертикали */
+
+    color: #dadada;
+    
+    letter-spacing: 1px;
+    text-align: center;
+    z-index: 3;
+    font-weight: 500;
+}
+
+
+.num-input{
+    border: none;
+    border-radius: 15px;
+    background-color: #3b3b3b;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 8px;
 }
 
-.input-panel button {
-    width: 40px;
-    height: 40px;
-    font-size: 1.5rem;
-    font-family: Arial, sans-serif;
-    background: #333;
-    color: #fff;
+.num-btn{
+    width: 100%;
+    height: 100%;
+    
+}
+
+.panel{
+    width: 100%;
+    
+    
+}
+
+.btn{
+    width: 100%;
+    height: 100%;
+}
+
+button{
     border: none;
-    border-radius: 9px;
-    transition: background 250ms cubic-bezier(.4,0,.2,1);
-}
-
-.input-panel span {
-    width: 40px;
-    display: inline-block;
-    text-align: center;
-    font-size: 1.5rem;
-    color: #fff;
-}
-
-.main-btn {
-    width: 90vw;
-    max-width: 320px;
-    background: #dadada;
-    color: #23232a;
-    font-weight: 600;
-    font-size: 1.5rem;
-    margin: 16px auto 0 auto;
-    padding: 16px 0;
-    border: none;
-    border-radius: 12px;
-    transition: background 600ms cubic-bezier(.4,0,.2,1), color 550ms cubic-bezier(.4,0,.2,1), filter 800ms cubic-bezier(.4,0,.2,1);
+    border-radius: 15px;
+    padding: 0;
+    background-color: #444;
+    color: #dadada;
     cursor: pointer;
-    outline: none;
-    filter: blur(0px);
-    letter-spacing: 1px;
+    text-align: center;
+    font-size: 20px;
 }
 
-.main-btn.disabled {
-    background: #353542;
-    color: #aaa;
-    pointer-events: none;
+button:hover{
+    background-color: #555;
+    cursor: pointer;
 }

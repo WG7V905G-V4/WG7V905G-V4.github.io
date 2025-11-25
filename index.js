@@ -30,6 +30,7 @@ function start(){
         mainBtn,
         true
     )
+
     btnState(
         [incBtn, decBtn],
         false
@@ -52,9 +53,15 @@ function count() {
     btnState(
         mainBtn,
         false,
-        "count")
+        "count");
+    btnState(
+        [incBtn, decBtn],
+        false
+    )
+        
     animation();
 }
+
 function* htmlBall(ballObj, time){
     let ballDiv = document.createElement("div");
     ballDiv.className = "ball";
@@ -63,21 +70,23 @@ function* htmlBall(ballObj, time){
     ballDiv.style.top = ballObj.top;
     ballDiv.style.left = ballObj.left;
     ballDiv.style.opacity = "1";
-    ballDiv.style.transition = "transform 0.s";
+    ballDiv.style.transition = `transform ${time}s`;
     document.body.appendChild(ballDiv);
     yield ballDiv;
 }
 
 function animation() {
-    const time = Math;
-
+    const time = Math.max(5-level*0.1, 1);
+    const move = time*0.3;
+    const weight = time*0.7;
     const ballsCLass = [...ballGenerator(level, centerBall.getBoundingClientRect())];
     const ballsDiv = [];
     for (const ballObj of ballsCLass) {
-        if (ballObj) ballsDiv.push(htmlBall(ballObj).next().value);
+        if (ballObj) ballsDiv.push(htmlBall(ballObj, move).next().value);
     }
+    
     btnState(
-        [mainBtn, incBtn, decBtn],
+        mainBtn,
         false
         )
 
@@ -90,18 +99,13 @@ function animation() {
     })
 
     setTimeout(() => {
-
-    }, 100);
-
-    setTimeout(() => {
-        ballsDiv.forEach((ballDiv) => {
+        ballsDiv.forEach((ballDiv, i) => {
             ballDiv.style.transform = "translate(0, 0)";
         });
-        setTimeout(()=>{
+        setTimeout(() => {
             ballsDiv.forEach(ball => ball.remove());
-        }, 900);
-    }, 100 + Math.max(0, 650 - level * 60));
-
+        }, weight);
+    }, move);
 
     inputStage(ballsDiv.length);
 }
@@ -167,6 +171,11 @@ function resetGame(fail = false) {
     centerBall.style.filter = "blur(0px)";
     setUserCount(0);
     gameState = fail ? "start" : "anim";
+
+    btnState(
+        [incBtn, decBtn],
+        false
+    )
 
     if (fail) {
         localStorage.setItem("topScore", topScore);

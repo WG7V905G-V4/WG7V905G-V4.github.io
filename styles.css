@@ -73,7 +73,7 @@ body {
     position: absolute;
     left: 50%;
     top: 38vh;
-    transition: all 0.7s cubic-bezier(.4,0,.2,1), opacity 380ms cubic-bezier(.4,0,.2,1);
+    transition: 0.5s ease-in-out;
     will-change: top, left, opacity;
 }
 
@@ -128,4 +128,3 @@ body {
     color: #aaa;
     pointer-events: none;
 }
-

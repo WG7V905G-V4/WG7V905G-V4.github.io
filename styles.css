@@ -24,7 +24,7 @@ body {
     justify-content: center; /* Центрирование элементов по вертикали (опционально) */
     height: 100vh; /* Занимаем всю высоту экрана */
 
-    padding: 5% 0 10% 0; /* Внутренние отступы (опционально) */
+    padding: 20px 0 100px 0; /* Внутренние отступы (опционально) */
     box-sizing: border-box; /* Учитываем padding в ширину */
 }
 
@@ -157,7 +157,7 @@ button{
     cursor: pointer;
     text-align: center;
     font-size: 25px;
-    transition: 0.5s ease-in-out;
+    transition: 0.1s ease-in-out;
 }
 
 button:active{

@@ -32,7 +32,7 @@ button.forEach(button => {
         const [hue, saturation] = genColor(prevHue);
         prevHue = hue;
         if(!button.disabled) {
-            button.style.backgroundColor = `hsl(${hue}, ${saturation-10}%, 50%)`;
+            button.style.backgroundColor = `hsl(${hue}, ${saturation-20}%, 50%)`;
             button.style.color = `#fff`;
         }
     });
@@ -55,6 +55,13 @@ mainBtn.addEventListener("click", ()=>{
 const numButtons = document.querySelectorAll(".num-btn");
 numButtons.forEach(numButton => {
     numButton.addEventListener("click", () => {
+
+        if(!numButton.disabled) {
+            const [hue, saturation] = genColor(prevHue);
+            prevHue = hue;
+            numButton.style.backgroundColor = `hsl(${hue}, ${saturation-20}%, 50%)`;
+            numButton.style.color = `#fff`;
+        }
         userCountSpan.textContent = showCount =
             numButton.id === "increment"
                 ? Math.min(showCount + 1, 999)

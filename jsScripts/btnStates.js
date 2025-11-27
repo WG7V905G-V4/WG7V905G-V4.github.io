@@ -1,24 +1,3 @@
-import {genColor} from "./ballgeneration.js";
-
-
-const button = document.querySelectorAll('button');
-button.forEach(button => {
-    let prevHue = null
-    button.addEventListener("mouseover", ()=>{
-        const [hue, saturation] = genColor(prevHue);
-        prevHue = hue;
-        if(!button.disabled) {
-            button.style.backgroundColor = `hsl(${hue}, ${saturation-10}%, 50%)`;
-            button.style.color = `#fff`;
-        }
-    });
-
-    button.addEventListener("mouseout", ()=> {
-        button.style.backgroundColor = "";
-        button.style.color = "";
-    });
-
-})
 
 
 

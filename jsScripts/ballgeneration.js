@@ -16,26 +16,22 @@ function getRandomBallsCount(level) {
 }
 
 export function genColor(prev = null) {
-    const hue = Math.floor(prev? prev+90+(Math.random()*40):Math.random() * 360);
+    const hue = prev
+        ? (prev + 90 + Math.random() * 40) % 360
+        : Math.random() * 360;
     const saturation = Math.floor(Math.random() * 31 + 70);
     return [ hue, saturation ];
 }
 
-export class Ball {
-    constructor(distanceX, distanceY, blur) {
-        this.distanceX = distanceX;
-        this.distanceY = distanceY;
-        this.blur = blur;
-    }
-}
 
-
-export function* ballGenerator(level, centerRect, time) {
+export function ballGenerator(level, centerRect, time) {
+    const fragment = document.createDocumentFragment();
     const numOfBalls = getRandomBallsCount(level);
     let prevHue = null;
     const grayBallCenterX = centerRect.left + (centerRect.width/2) ;
     const grayBallCenterY = centerRect.top + (centerRect.height/2)  + window.scrollY;
-    const biasAngle = Math.random() * 100;
+    const balls = [];
+    const biasAngle = Math.random() * Math.PI;
     for (let i = 0; i < numOfBalls; i++) {
         const angle = ((2 * Math.PI) * i / numOfBalls) + (Math.random()*3 - 0.5) * 0.05 + biasAngle;
         const radius = centerRect.width*Math.min(Math.max(Math.random(), 1/(1+level*0.1)), 0.7)
@@ -58,17 +54,12 @@ export function* ballGenerator(level, centerRect, time) {
         ballDiv.style.left = left;
         ballDiv.style.filter = "blur(0px)"
         ballDiv.style.transition = `transform ${time}s ease-in-out, filter ${time/3}s ease-in-out`;
-        document.body.appendChild(ballDiv);
+        fragment.appendChild(ballDiv);
 
+        balls.push([ballDiv, `translate(${distanceX}px, ${distanceY}px)`, `blur(${blur}px)`]);
 
-        yield [
-            ballDiv,
-            new Ball(
-                distanceX,
-                distanceY,
-                blur
-            )
-        ];
     }
+    document.body.appendChild(fragment);
+    return balls;
 }
 
